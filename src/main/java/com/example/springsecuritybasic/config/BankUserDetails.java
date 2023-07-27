@@ -1,4 +1,4 @@
-package com.example.springsecuritybasic.service;
+package com.example.springsecuritybasic.config;
 
 import com.example.springsecuritybasic.model.Customer;
 import com.example.springsecuritybasic.repository.CustomerRepository;
