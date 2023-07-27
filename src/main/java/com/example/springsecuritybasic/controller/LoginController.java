@@ -5,6 +5,7 @@ import com.example.springsecuritybasic.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,13 +16,17 @@ public class LoginController {
     @Autowired
     private CustomerService customerService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody Customer customer){
 
         ResponseEntity responseEntity = null;
 
         try{
-            Customer newCustomer = customerService.save(customer);
+            customer.setPwd(passwordEncoder.encode(customer.getPwd()));
+            Customer newCustomer  = customerService.save(customer);
             if(newCustomer.getId() > 0)
                 responseEntity = ResponseEntity
                         .status(HttpStatus.CREATED)
