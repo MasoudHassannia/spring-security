@@ -1,11 +1,13 @@
 package com.example.springsecuritybasic.config;
 
+import com.example.springsecuritybasic.filter.CsrfCookieFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,6 +16,9 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -25,9 +30,15 @@ public class ProjectSecurityConfig {
 
     @Bean
     public SecurityFilterChain mySecurityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(httpSecurityCorsConfigurer ->
+        CsrfTokenRequestAttributeHandler tokenHandler = new CsrfTokenRequestAttributeHandler();
+
+        http.securityContext(context -> context.requireExplicitSave(false)).
+                sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .cors(httpSecurityCorsConfigurer ->
                         httpSecurityCorsConfigurer.configurationSource(getCorsConfiguration()))
-                .csrf(csrfConfigurer -> csrfConfigurer.ignoringRequestMatchers("/contact","/register"))
+                .csrf(csrfConfigurer -> csrfConfigurer.csrfTokenRequestHandler(tokenHandler).ignoringRequestMatchers("/contact","/register")
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((request) -> request
                         .requestMatchers("/myAccount","/myBalance","/myLoans","/myCards","/user").authenticated()
                         .requestMatchers("/notices","/contact","/register").permitAll())
