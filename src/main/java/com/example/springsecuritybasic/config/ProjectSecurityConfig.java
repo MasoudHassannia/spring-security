@@ -27,7 +27,7 @@ public class ProjectSecurityConfig {
     public SecurityFilterChain mySecurityFilterChain(HttpSecurity http) throws Exception {
         http.cors(httpSecurityCorsConfigurer ->
                         httpSecurityCorsConfigurer.configurationSource(getCorsConfiguration()))
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrfConfigurer -> csrfConfigurer.ignoringRequestMatchers("/contact","/register"))
                 .authorizeHttpRequests((request) -> request
                         .requestMatchers("/myAccount","/myBalance","/myLoans","/myCards","/user").authenticated()
                         .requestMatchers("/notices","/contact","/register").permitAll())

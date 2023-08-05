@@ -2,9 +2,8 @@ package com.example.springsecuritybasic.controller;
 
 import com.example.springsecuritybasic.model.Contact;
 import com.example.springsecuritybasic.repository.ContactRepository;
-import com.example.springsecuritybasic.service.CardsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +16,7 @@ public class ContactController {
     @Autowired
     private ContactRepository contactRepository;
 
-    @GetMapping("/contact")
+    @PostMapping("/contact")
     public Contact saveContactInquiryDetails(@RequestBody Contact contact) {
         contact.setContactId(getServiceReqNumber());
         contact.setCreateDt(new Date(System.currentTimeMillis()));
