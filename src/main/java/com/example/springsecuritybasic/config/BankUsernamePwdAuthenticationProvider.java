@@ -1,5 +1,6 @@
 package com.example.springsecuritybasic.config;
 
+import com.example.springsecuritybasic.model.Authority;
 import com.example.springsecuritybasic.model.Customer;
 import com.example.springsecuritybasic.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class BankUsernamePwdAuthenticationProvider implements AuthenticationProvider {
@@ -32,9 +34,7 @@ public class BankUsernamePwdAuthenticationProvider implements AuthenticationProv
         List<Customer> customers = customerService.findByEmail(username);
         if(!customers.isEmpty()) {
             if (passwordEncoder.matches(password, customers.get(0).getPwd())) {
-                List<GrantedAuthority> authorities = new ArrayList<>();
-                authorities.add(new SimpleGrantedAuthority(customers.get(0).getRole()));
-                return new UsernamePasswordAuthenticationToken(username, password, authorities);
+                return new UsernamePasswordAuthenticationToken(username, password, getGrantedAuthorities(customers.get(0).getAuthorities()));
             } else {
                 throw new BadCredentialsException("Invalid password");
             }
@@ -43,6 +43,15 @@ public class BankUsernamePwdAuthenticationProvider implements AuthenticationProv
 
         }
 
+    }
+
+    private List<GrantedAuthority> getGrantedAuthorities(Set<Authority> authorities){
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        for (Authority authority : authorities) {
+            grantedAuthorities.add(new SimpleGrantedAuthority(authority.getName()));
+
+        }
+        return grantedAuthorities;
     }
 
     @Override
