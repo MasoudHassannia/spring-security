@@ -1,6 +1,9 @@
 package com.example.springsecuritybasic.config;
 
+import com.example.springsecuritybasic.filter.AuthoritiesLoggingAfterFilter;
+import com.example.springsecuritybasic.filter.AuthoritiesLoggingAtFilter;
 import com.example.springsecuritybasic.filter.CsrfCookieFilter;
+import com.example.springsecuritybasic.filter.RequestValidationBeforeFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +42,9 @@ public class ProjectSecurityConfig {
                 .csrf(csrfConfigurer -> csrfConfigurer.csrfTokenRequestHandler(tokenHandler).ignoringRequestMatchers("/contact","/register")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new RequestValidationBeforeFilter(),BasicAuthenticationFilter.class)
+                .addFilterAt(new AuthoritiesLoggingAtFilter(),BasicAuthenticationFilter.class)
+                .addFilterAfter(new AuthoritiesLoggingAfterFilter(),BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((request) -> request
                         /*.requestMatchers("/myAccount").hasAuthority("VIEWACCOUNT")
                        .requestMatchers("/myBalance").hasAnyAuthority("VIEWACCOUNT","VIEWBALANCE")
@@ -48,7 +54,7 @@ public class ProjectSecurityConfig {
                         .requestMatchers("/myBalance").hasAnyRole("USER","ADMIN")
                         .requestMatchers("/myLoans").hasRole("USER")
                         .requestMatchers("/myCards").hasRole("USER")
-                        .requestMatchers("/myAccount","/myBalance","/myLoans","/myCards","/user").authenticated()
+                        .requestMatchers("/user").authenticated()
                         .requestMatchers("/notices","/contact","/register").permitAll())
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
